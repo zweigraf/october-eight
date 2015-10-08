@@ -9,7 +9,11 @@
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController {
+var GlobalBackgroundQueue: dispatch_queue_t {
+    return dispatch_get_global_queue(Int(QOS_CLASS_BACKGROUND.rawValue), 0)
+}
+
+class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     let session : AVCaptureSession = AVCaptureSession()
     var previewLayer : AVCaptureVideoPreviewLayer? = nil
     @IBOutlet weak var previewHolder: UIView!
@@ -53,6 +57,22 @@ class ViewController: UIViewController {
         session.startRunning()
         
         mergePreview(previewLayer!)
+        
+        let metaOutput = AVCaptureMetadataOutput()
+        
+        let queue = GlobalBackgroundQueue
+        metaOutput.setMetadataObjectsDelegate(self, queue: queue)
+        
+        session.addOutput(metaOutput)
+        
+        if let array = metaOutput.availableMetadataObjectTypes as? [String] {
+            guard array.contains("face") else {
+                failToCreateFaceDetection()
+                return
+            }
+            metaOutput.metadataObjectTypes = ["face"]
+        }
+        
     }
 
     func failToCreateSession() {
@@ -63,6 +83,10 @@ class ViewController: UIViewController {
         alert.addAction(action)
         self.presentViewController(alert, animated: true, completion: nil)
     }
+
+func failToCreateFaceDetection() {
+    
+}
     
     func mergePreview(layer: AVCaptureVideoPreviewLayer) {
         let backingLayer = previewHolder.layer
@@ -80,6 +104,11 @@ class ViewController: UIViewController {
         previewLayer?.frame = previewHolder.bounds
     }
     
+    // MARK: AVCaptureMetadataOutputObjectsDelegate
+    
+    func captureOutput(captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [AnyObject]!, fromConnection connection: AVCaptureConnection!) {
+        print(metadataObjects)
+    }
     
 }
 
