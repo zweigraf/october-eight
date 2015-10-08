@@ -42,8 +42,16 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     // MARK: Session & Preview Handling
     
     func createSession() {
-        let videoDevices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
-        guard let device = videoDevices.first as? AVCaptureDevice else {
+        guard let videoDevices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo) as? [AVCaptureDevice] else {
+            failToCreateSession()
+            return
+        }
+        
+        let frontDevices = videoDevices.filter { (el) -> Bool in
+            el.position == .Front
+        }
+        
+        guard let device = frontDevices.first else {
             failToCreateSession()
             return
         }
@@ -51,6 +59,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             failToCreateSession()
             return
         }
+        
         session.addInput(input)
         previewLayer = AVCaptureVideoPreviewLayer(session: session)
         
