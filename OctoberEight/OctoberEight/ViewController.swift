@@ -93,9 +93,9 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
         self.presentViewController(alert, animated: true, completion: nil)
     }
 
-func failToCreateFaceDetection() {
-    
-}
+    func failToCreateFaceDetection() {
+        
+    }
     
     func mergePreview(layer: AVCaptureVideoPreviewLayer) {
         let backingLayer = previewHolder.layer
