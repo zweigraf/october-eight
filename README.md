@@ -6,5 +6,5 @@ Detect faces with AVCaptureSession.
 ## TODO
 
 - [ ] Highlight faces visually instead of just printing them out to the console
-- [ ] Implement ```failToCreateFaceDetection()```
+- [x] Implement ```failToCreateFaceDetection()```
 - [ ] Figure out how to test this stuff (Ideas?)
