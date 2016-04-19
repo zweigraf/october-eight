@@ -16,6 +16,8 @@ var GlobalBackgroundQueue: dispatch_queue_t {
 class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     let session : AVCaptureSession = AVCaptureSession()
     var previewLayer : AVCaptureVideoPreviewLayer? = nil
+    var faceLayers : [CALayer] = []
+    
     @IBOutlet weak var previewHolder: UIView!
     
     // MARK: Overrides
@@ -118,6 +120,32 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [AnyObject]!, fromConnection connection: AVCaptureConnection!) {
         print(metadataObjects)
+        
+        
+        dispatch_async(dispatch_get_main_queue()) { [weak self]
+            self.faceLayers.forEach({ (layer) in
+                layer.removeFromSuperlayer()
+            })
+            self.faceLayers = metadataObjects
+                .filter { $0.isKindOfClass(AVMetadataFaceObject)}
+                .flatMap { (faceObject) -> CGRect? in
+                    let faceRect = faceObject.bounds
+                    return self.previewLayer?.rectForMetadataOutputRectOfInterest(faceRect)
+                }
+                .map{ (rect) -> CALayer in
+                    let rectLayer = CALayer()
+                    rectLayer.borderColor = UIColor.whiteColor().CGColor
+                    rectLayer.borderWidth = 10.0
+                    rectLayer.frame = rect
+                    return rectLayer
+                }
+
+            self.faceLayers.forEach({ (layer) in
+                self.previewLayer?.addSublayer(layer)
+            })
+            self.previewLayer?.setNeedsDisplay()
+
+        }
     }
     
     // MARK: UI Helper
