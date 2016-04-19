@@ -85,16 +85,17 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     }
 
     func failToCreateSession() {
-        let alert = UIAlertController(title: "Oops", message: "Sorry, but we could not get your camera at the moment. Please try again.", preferredStyle: .Alert)
-        let action = UIAlertAction(title: "Retry", style: .Default) { (action: UIAlertAction) -> Void in
+        let alert = createRetryAlert("Sorry, but we could not get your camera at the moment. Please try again.") { 
             self.createSession()
         }
-        alert.addAction(action)
         self.presentViewController(alert, animated: true, completion: nil)
     }
 
     func failToCreateFaceDetection() {
-        
+        let alert = createRetryAlert("Sorry, but we could not start face detection at the moment. Please try again.") {
+            self.createSession()
+        }
+        self.presentViewController(alert, animated: true, completion: nil)
     }
     
     func mergePreview(layer: AVCaptureVideoPreviewLayer) {
@@ -117,6 +118,19 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [AnyObject]!, fromConnection connection: AVCaptureConnection!) {
         print(metadataObjects)
+    }
+    
+    // MARK: UI Helper
+    
+    func createRetryAlert(message: String, retryHandler: () -> ()) -> UIAlertController {
+        let alert = UIAlertController(title: "Oops", message: message, preferredStyle: .Alert)
+        let action = UIAlertAction(title: "Retry", style: .Default) { (action: UIAlertAction) -> Void in
+            retryHandler()
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Default, handler: nil)
+        alert.addAction(action)
+        alert.addAction(cancelAction)
+        return alert
     }
     
 }
